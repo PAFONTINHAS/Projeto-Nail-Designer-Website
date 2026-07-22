@@ -33,7 +33,7 @@ class _SplashScreenState extends State<SplashScreen> {
     final servicoController = context.read<ServicoController>();
     final relatorioController = context.read<RelatorioController>();
     final agendamentoController = context.read<AgendamentoController>();
-    final configuracoesController = context.read<ConfiguracoesController>();
+    final configuracoesController = context.read<AgendaController>();
     final relatorioFieldsController = context.read<RelatorioFieldsController>();
     final agendamentoFieldsController = context.read<AgendamentoFieldsController>();
 

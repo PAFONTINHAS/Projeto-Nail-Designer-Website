@@ -1,16 +1,17 @@
-import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
+import 'package:flutter/material.dart';
 import 'package:mobile/features/agenda/domain/entities/agenda.dart';
+import 'package:mobile/features/agenda/domain/entities/dia_trabalho.dart';
 import 'package:mobile/features/agenda/domain/usecases/get_agenda_usecase.dart';
 import 'package:mobile/features/agenda/domain/usecases/update_agenda_usecase.dart';
 import 'package:mobile/features/agenda/presentation/pages/agenda_config_page.dart';
 
-class ConfiguracoesController extends ChangeNotifier{
+class AgendaController extends ChangeNotifier{
 
   final GetAgendaUsecase _getAgendaUsecase;
   final UpdateAgendaUsecase _updateAgendaUsecase;
 
-  ConfiguracoesController(this._getAgendaUsecase,  this._updateAgendaUsecase);
+  AgendaController(this._getAgendaUsecase,  this._updateAgendaUsecase);
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -20,6 +21,9 @@ class ConfiguracoesController extends ChangeNotifier{
 
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
+
+  List<DiaTrabalho> _diasTrabalho = [];
+  List<DiaTrabalho> get diasTrabalho => _diasTrabalho;
   
   String _horarioInicio = "";
   String get horarioInicio => _horarioInicio;
@@ -39,9 +43,8 @@ class ConfiguracoesController extends ChangeNotifier{
   bool get haveAgendaChanged => verifyAgendaChanges();
 
   Future<void> fillAgenda() async{
-    _selecionados = agenda?.diasTrabalho ?? [];
-    _horarioInicio = agenda?.horarioInicio ?? _horarioInicio;
-    _horarioFim = agenda?.horarioFim ?? _horarioFim;
+
+    _diasTrabalho = agenda?.diasTrabalho ?? [];
     _datasBloqueadas = agenda?.datasBloqueadas ?? _datasBloqueadas;
     _agendaAtiva = agenda?.agendaAtiva ?? _agendaAtiva;
 
@@ -52,18 +55,18 @@ class ConfiguracoesController extends ChangeNotifier{
 
     if (agenda == null) return false;
 
-    if(_horarioFim != agenda!.horarioFim) return true;
+
     if(_agendaAtiva != agenda!.agendaAtiva) return true;
-    if(_horarioInicio != agenda!.horarioInicio) return true;
+
+    if(!_islistsEqual(_diasTrabalho, agenda!.diasTrabalho)) return true;
 
     
-    if(!_listEquals(_selecionados, agenda!.diasTrabalho)) return true;
-    if(!_listEquals(_datasBloqueadas, agenda!.datasBloqueadas)) return true;
+    if(!_islistsEqual(_datasBloqueadas, agenda!.datasBloqueadas)) return true;
 
     return false;
   }
 
-  bool _listEquals(List a, List b){
+  bool _islistsEqual(List a, List b){
     if(a.length != b.length) return false;
 
     for(int i = 0; i<a.length; i++){
@@ -153,11 +156,9 @@ class ConfiguracoesController extends ChangeNotifier{
   Future<Agenda> buildUpdatedAgenda() async{
     
     return Agenda(
-      diasTrabalho: _selecionados,
-      horarioInicio: _horarioInicio,
-      horarioFim: _horarioFim,
-      datasBloqueadas: datasBloqueadas,
       agendaAtiva: agendaAtiva,
+      diasTrabalho: _diasTrabalho,
+      datasBloqueadas: datasBloqueadas,
     );
   }  
 

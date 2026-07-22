@@ -76,26 +76,27 @@ class AgendamentoFieldsController extends ChangeNotifier{
   List<Servico> get selecionados => _selecionados;
 
   List<HorarioSlot> get gerarGradeHorarios{
-    if(agenda == null) return [];
+    // if(agenda == null) return [];
 
-    List<HorarioSlot> slots = [];
+    // List<HorarioSlot> slots = [];
 
-    final int inicio = convertStringToTime(agenda!.horarioInicio);
-    final int fim = convertStringToTime(agenda!.horarioFim);
-    final int duracao = tempoTotal;
+    // final int inicio = convertStringToTime(agenda!.horarioInicio);
+    // final int fim = convertStringToTime(agenda!.horarioFim);
+    // final int duracao = tempoTotal;
 
-    for(int minutes = inicio; minutes < fim; minutes += 60){
-      String horaFormatada = formatMinutes(minutes);
+    // for(int minutes = inicio; minutes < fim; minutes += 60){
+    //   String horaFormatada = formatMinutes(minutes);
 
-      bool estaOcupado = _verificarConflito(minutes, agendamentosDoDia);
+    //   bool estaOcupado = _verificarConflito(minutes, agendamentosDoDia);
 
-      bool cabeDuracao = _verificarSeCabe(minutes, duracao, agendamentosDoDia, fim);
+    //   bool cabeDuracao = _verificarSeCabe(minutes, duracao, agendamentosDoDia, fim);
 
-      slots.add(HorarioSlot(hora: horaFormatada, ocupado: estaOcupado, disponivelPelaDuracao: cabeDuracao));
-    }
+    //   slots.add(HorarioSlot(hora: horaFormatada, ocupado: estaOcupado, disponivelPelaDuracao: cabeDuracao));
+    // }
 
-    return slots;
+    // return slots;
 
+    return [];
   }
 
   bool _verificarConflito(int minutos, List<AgendamentoEntity> agendamentosDoDia){
@@ -261,15 +262,15 @@ class AgendamentoFieldsController extends ChangeNotifier{
 
   void _validarHorarioAposMudanca(BuildContext context){
 
-    if(_horarioSelecionado == null) return;
+    // if(_horarioSelecionado == null) return;
 
-    int momentoInicio = convertStringToTime(_horarioSelecionado!);
-    int limiteFim = agenda != null ? convertStringToTime(agenda!.horarioFim) : 1440;  
+    // int momentoInicio = convertStringToTime(_horarioSelecionado!);
+    // int limiteFim = agenda != null ? convertStringToTime(agenda!.horarioFim) : 1440;  
 
-    if(!_verificarSeCabe(momentoInicio, tempoTotal, _agendamentosDoDia, limiteFim)){
-      _horarioSelecionado = null;
-      mostrarFeedback(context, "O horário selecionado não comporta a nova duração.", Colors.orange);
-    }
+    // if(!_verificarSeCabe(momentoInicio, tempoTotal, _agendamentosDoDia, limiteFim)){
+    //   _horarioSelecionado = null;
+    //   mostrarFeedback(context, "O horário selecionado não comporta a nova duração.", Colors.orange);
+    // }
   }
 
   void setName(String name){

@@ -36,7 +36,7 @@ Widget build(BuildContext context) {
     floatingActionButton: FloatingActionButton.extended(
       onPressed: () {
         final agendamentoController=  context.read<AgendamentoController>();
-        final agendaController = context.read<ConfiguracoesController>();
+        final agendaController = context.read<AgendaController>();
         final agendamentoFieldsController = context.read<AgendamentoFieldsController>();
 
         agendamentoFieldsController.setAgendamentosDoDia(agendamentoController.agendamentos);

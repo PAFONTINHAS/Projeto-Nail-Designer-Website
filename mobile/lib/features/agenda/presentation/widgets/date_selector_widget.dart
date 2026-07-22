@@ -22,10 +22,10 @@ class _DiasSelectorState extends State<DateSelectorWidget> {
         borderRadius: BorderRadius.circular(15),
         boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5)],
       ),
-      child: Selector<ConfiguracoesController, List<int>>(
+      child: Selector<AgendaController, List<int>>(
         selector: (_, controller) => controller.selecionados,
         builder: (context, selecionados, child) {
-          final controller = context.read<ConfiguracoesController>();
+          final controller = context.read<AgendaController>();
           controller.orderDiasSelecionados();
 
           Logger().i("Dias selecionados:  $selecionados");
