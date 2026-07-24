@@ -2,6 +2,7 @@ import 'package:logger/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/features/agenda/domain/entities/agenda.dart';
 import 'package:mobile/features/agenda/domain/entities/dia_trabalho.dart';
+import 'package:mobile/features/agenda/domain/entities/intervalo.dart';
 import 'package:mobile/features/agenda/domain/usecases/get_agenda_usecase.dart';
 import 'package:mobile/features/agenda/domain/usecases/update_agenda_usecase.dart';
 import 'package:mobile/features/agenda/presentation/pages/agenda_config_page.dart';
@@ -153,6 +154,48 @@ class AgendaController extends ChangeNotifier{
   void setSelectedDiaTrabalho (DiaTrabalho diaTrabalho){
     _selectedDiaTrabalho = diaTrabalho;
     notifyListeners();
+  }
+
+  void addInterval(int weekday){
+
+    List<Intervalo> intervalos = List.from(selectedDiaTrabalho.pausas)
+      ..sort((a, b) => a.intervalId.compareTo(b.intervalId));
+
+
+    int intervalId = intervalos.isEmpty ? 0 : intervalos.last.intervalId + 1;
+
+    Intervalo intervalo = Intervalo(intervalId, "10:00", "11:00");
+
+    intervalos.add(intervalo);
+
+    DiaTrabalho outdatedWorkday = getWorkDayByWeekDay(weekday);
+
+    DiaTrabalho updatedWorkday = outdatedWorkday.copyWith(pausas: intervalos);
+    setSelectedDiaTrabalho(updatedWorkday);
+
+    _addNewWorkday(updatedWorkday);
+
+    notifyListeners();
+  }
+
+  void removeInterval(int weekday, int intervalId){
+
+    List<Intervalo> intervalos = List.from(selectedDiaTrabalho.pausas)..removeWhere((pausa) => pausa.intervalId == intervalId);
+
+    DiaTrabalho outdatedWorkday = getWorkDayByWeekDay(weekday);
+
+    DiaTrabalho updatedWorkday = outdatedWorkday.copyWith(pausas: intervalos);
+    setSelectedDiaTrabalho(updatedWorkday);
+
+    _addNewWorkday(updatedWorkday);
+
+    notifyListeners();
+  }
+
+  DiaTrabalho getWorkDayByWeekDay(int weekday){
+
+    return _diasTrabalho.firstWhere((day) => day.diaSemana == weekday);
+
   }
 
   void changeClosingHour(int weekday, String closingHour){

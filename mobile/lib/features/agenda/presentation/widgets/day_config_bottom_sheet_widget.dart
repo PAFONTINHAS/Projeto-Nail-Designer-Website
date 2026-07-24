@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/core/utils/time_picker_helper.dart';
+import 'package:mobile/features/agenda/domain/entities/intervalo.dart';
 import 'package:mobile/features/agenda/presentation/controllers/agenda_controller.dart';
 import 'package:provider/provider.dart';
 
@@ -98,26 +99,40 @@ class DayConfigBottomSheetWidget extends StatelessWidget {
               const Text("Pausas / Almoço", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               TextButton.icon(
                 onPressed: () { 
-                  // Adicionar novo Intervalo('12:00', '13:00') na lista do diaTrabalho
-                  // controller.adicionarPausa(diaTrabalho.diaSemana);
+                  controller.addInterval(controller.selectedDiaTrabalho.diaSemana);
                 },
                 icon: const Icon(Icons.add, color: Color(0xFFEC489A)),
                 label: const Text("ADICIONAR", style: TextStyle(color: Color(0xFFEC489A))),
               )
             ],
           ),
-          
-          // LISTA DE PAUSAS
-          ...controller.selectedDiaTrabalho.pausas.map((pausa) => ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.free_breakfast_outlined),
-            title: Text("${pausa.inicio} até ${pausa.fim}"),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete_outline, color: Colors.red),
-              onPressed: () =>{} // controller.removerPausa(diaTrabalho.diaSemana, pausa),
+
+            Selector<AgendaController, List<Intervalo>>(
+              selector: (_, controller) => controller.selectedDiaTrabalho.pausas,
+              builder: (context, pausas, child) {
+                return ListView.builder(
+                  itemCount: pausas.isEmpty ? 0 : pausas.length ,
+                  shrinkWrap: true,
+                  itemBuilder: (context, index){
+
+
+                    final pausa = pausas[index];
+
+                    return ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(Icons.free_breakfast_outlined),
+                      title: Text("${pausa.inicio} até ${pausa.fim}"),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete_outline, color: Colors.red),
+                        onPressed: () => controller.removeInterval(controller.selectedDiaTrabalho.diaSemana, pausa.intervalId),
+                      ),
+                    );
+                  },
+
+                );
+              },
             ),
-          )),
-          
+
           const SizedBox(height: 30),
 
           const SizedBox(height: 20),

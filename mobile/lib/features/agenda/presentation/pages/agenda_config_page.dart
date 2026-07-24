@@ -41,6 +41,7 @@ class _ConfigPageState extends State<ConfigPage> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           child: Column(
             children: [
+
               // SEÇÃO 1: STATUS DA AGENDA
               const ScheduleActivityStatusCardWidget(),
 
