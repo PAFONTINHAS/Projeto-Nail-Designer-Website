@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/features/agenda/presentation/controllers/agenda_controller.dart';
 import 'package:mobile/features/agenda/presentation/handlers/agenda_actions_handler.dart';
-import 'package:mobile/features/agenda/presentation/pages/agenda_config_page.dart';
 import 'package:provider/provider.dart';
 
 class ChangeBasedButtonWidget extends StatelessWidget {
@@ -13,7 +12,6 @@ class ChangeBasedButtonWidget extends StatelessWidget {
       selector: (_, controller) => controller.haveAgendaChanged,
       builder: (context, value, child) {
 
-        logger.i("Agenda mudou? $value");
         
         if(!value){
           return SizedBox.shrink();

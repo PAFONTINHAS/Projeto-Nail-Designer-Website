@@ -9,6 +9,22 @@ class DiaTrabalho extends Equatable {
 
   const DiaTrabalho({required this.diaSemana, required this.inicio, required this.fim, this.pausas = const []});
 
+  DiaTrabalho copyWith ({
+    int? diaSemana,
+    String? inicio,
+    String? fim,
+    List<Intervalo>? pausas 
+  }){
+
+    return DiaTrabalho(
+      diaSemana: diaSemana ?? this.diaSemana,
+      inicio: inicio ?? this.inicio,
+      fim: fim ?? this.fim,
+      pausas: pausas ?? this.pausas,
+    );
+
+  }
+
   @override
   List<Object?> get props => [
     diaSemana,

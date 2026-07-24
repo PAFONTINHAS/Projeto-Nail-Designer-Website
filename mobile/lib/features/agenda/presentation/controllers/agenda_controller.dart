@@ -37,6 +37,9 @@ class AgendaController extends ChangeNotifier{
   List<String> _datasBloqueadas = [];
   List<String> get datasBloqueadas => _datasBloqueadas;
 
+  late DiaTrabalho _selectedDiaTrabalho;
+  DiaTrabalho get selectedDiaTrabalho => _selectedDiaTrabalho;
+
   bool _agendaAtiva = true;
   bool get agendaAtiva => _agendaAtiva;
 
@@ -74,6 +77,100 @@ class AgendaController extends ChangeNotifier{
     }
 
     return true;
+  }
+
+  void toggleWorkDay(int weekday, bool value){
+
+    logger.i("Toggling workday. Weekday: $weekday, active: $value");
+
+    if(!value){
+
+      logger.i("Toggling workday. Weekday: $weekday, active: $value");
+
+      _diasTrabalho.removeWhere((dia) => dia.diaSemana == weekday);
+
+      notifyListeners();
+
+      return;
+    }
+
+    DiaTrabalho diaTrabalho = generateGenericWorkDay(weekday);
+
+    _addNewWorkday(diaTrabalho);
+
+    notifyListeners();
+  }
+
+  void _addNewWorkday(DiaTrabalho workDay){
+
+    logger.i("Dia a ser adicionado: $workDay");
+
+    bool alreadyIn = _diasTrabalho.any((day) => day.diaSemana == workDay.diaSemana);
+
+    logger.i("Lista já possui o dia inserido: $alreadyIn");
+
+    if(alreadyIn){
+
+      int index = _diasTrabalho.indexWhere((day) => day.diaSemana == workDay.diaSemana);
+
+      List<DiaTrabalho> workdays = _diasTrabalho;
+
+      workdays[index] = workDay;
+
+      _diasTrabalho = workdays;
+
+      logger.i("Dia alterado com sucesso");
+
+      logger.i("Agenda atual: $_diasTrabalho");
+
+
+      return;
+    }
+
+    _diasTrabalho = List.from(_diasTrabalho)..add(workDay);
+
+    logger.i("Dia adicionado com sucesso");
+
+    logger.i("Agenda atual: $_diasTrabalho");
+  }
+
+  void changeOpeningHour(int weekday, String openingHour){
+    
+    logger.i("Alterando o horário de inicio para o dia: $weekday. Horário de inicio: $openingHour");
+
+    final DiaTrabalho outdatedWorkday = _diasTrabalho.firstWhere((day) => day.diaSemana == weekday);
+
+    final DiaTrabalho updatedWorkday = outdatedWorkday.copyWith(inicio: openingHour);
+
+    _addNewWorkday(updatedWorkday);
+
+    setSelectedDiaTrabalho(updatedWorkday);
+
+    notifyListeners();  
+
+  }
+
+  void setSelectedDiaTrabalho (DiaTrabalho diaTrabalho){
+    _selectedDiaTrabalho = diaTrabalho;
+    notifyListeners();
+  }
+
+  void changeClosingHour(int weekday, String closingHour){
+
+    final DiaTrabalho outdatedWorkday = _diasTrabalho.firstWhere((day) => day.diaSemana == weekday);
+
+    final DiaTrabalho updatedWorkday = outdatedWorkday.copyWith(fim: closingHour);
+
+    _addNewWorkday(updatedWorkday);
+
+    setSelectedDiaTrabalho(updatedWorkday);
+
+    notifyListeners();  
+  }
+
+  DiaTrabalho generateGenericWorkDay(int weekday){
+
+    return DiaTrabalho(diaSemana: weekday, inicio: "09:00", fim: "18:00");
   }
 
   void orderDiasSelecionados(){

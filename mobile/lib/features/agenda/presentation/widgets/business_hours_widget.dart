@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/features/agenda/domain/entities/dia_trabalho.dart';
+import 'package:mobile/features/agenda/presentation/pages/agenda_config_page.dart';
 import 'package:mobile/features/agenda/presentation/widgets/day_config_bottom_sheet_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:mobile/features/agenda/presentation/controllers/agenda_controller.dart';
@@ -16,7 +18,7 @@ class BusinessHoursWidget extends StatelessWidget {
       'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'
     ];
 
-    final configuredDays = controller.agenda?.diasTrabalho ?? [];
+    final configuredDays = controller.diasTrabalho;
 
     return SchedulePageCardWidget(
       title: "Horários por Dia",
@@ -44,7 +46,7 @@ class BusinessHoursWidget extends StatelessWidget {
               activeThumbColor: const Color(0xFFEC489A),
               onChanged: (value) {
                 // Aqui você chama a lógica para ativar/desativar o dia vazio
-                // controller.toggleWorkDay(weekday, value);
+                controller.toggleWorkDay(weekday, value);
               },
             ),
             onTap: isActive 
@@ -57,12 +59,17 @@ class BusinessHoursWidget extends StatelessWidget {
     );
   }
 
-  void _abrirConfiguracaoDoDia(BuildContext context, dynamic diaTrabalho, dynamic controller) {
+  void _abrirConfiguracaoDoDia(BuildContext context, DiaTrabalho diaTrabalho, AgendaController controller) {
+
+    logger.i("Dia de trabaho: $diaTrabalho");
+
+    controller.setSelectedDiaTrabalho(diaTrabalho);
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (context) => DayConfigBottomSheetWidget(diaTrabalho: diaTrabalho, controller: controller),
+      builder: (context) => DayConfigBottomSheetWidget(controller: controller),
     );
   }
 }

@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/core/utils/time_picker_helper.dart';
+import 'package:mobile/features/agenda/presentation/controllers/agenda_controller.dart';
+import 'package:provider/provider.dart';
 
 class DayConfigBottomSheetWidget extends StatelessWidget {
-  final dynamic diaTrabalho;
-  final dynamic controller;
+  // final DiaTrabalho diaTrabalho;
+  final AgendaController controller;
 
-  const DayConfigBottomSheetWidget({super.key, required this.diaTrabalho, required this.controller});
+  const DayConfigBottomSheetWidget({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
+
     return Padding(
       // Evita que o teclado/bottom de navegação cubra o conteúdo
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 20, right: 20, top: 20),
@@ -43,20 +47,42 @@ class DayConfigBottomSheetWidget extends StatelessWidget {
             children: [
               Expanded(
                 child: InkWell(
-                  onTap: () { /* Abrir TimePicker e atualizar diaTrabalho.inicio */ },
+                  onTap: () async { 
+                    String? pickedTime = await TimePickerHelper.selectTime(context, controller.selectedDiaTrabalho.inicio);
+
+                    if(pickedTime != null){
+                      
+                      controller.changeOpeningHour(controller.selectedDiaTrabalho.diaSemana, pickedTime);
+                    }
+
+                  },
                   child: InputDecorator(
                     decoration: const InputDecoration(labelText: "Início", border: OutlineInputBorder()),
-                    child: Text(diaTrabalho.inicio),
+                    child: Selector<AgendaController, String>(
+                      selector: (context, controller) => controller.selectedDiaTrabalho.inicio,
+                      builder: (context, value, child) => Text(value),
+                    ),
                   ),
                 ),
               ),
               const SizedBox(width: 15),
               Expanded(
                 child: InkWell(
-                  onTap: () { /* Abrir TimePicker e atualizar diaTrabalho.fim */ },
+                  onTap: () async {
+                    String? pickedTime = await TimePickerHelper.selectTime(context, controller.selectedDiaTrabalho.inicio);
+
+                    if(pickedTime != null){
+                      
+                      controller.changeClosingHour(controller.selectedDiaTrabalho.diaSemana, pickedTime);
+                    }
+
+                  },
                   child: InputDecorator(
                     decoration: const InputDecoration(labelText: "Fim", border: OutlineInputBorder()),
-                    child: Text(diaTrabalho.fim),
+                    child: Selector<AgendaController, String>(
+                      selector: (context, controller) => controller.selectedDiaTrabalho.fim,
+                      builder: (context, value, child) => Text(value),
+                    ),
                   ),
                 ),
               ),
@@ -64,7 +90,7 @@ class DayConfigBottomSheetWidget extends StatelessWidget {
           ),
           
           const Divider(height: 40),
-          
+
           // PAUSAS / INTERVALOS
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -82,13 +108,13 @@ class DayConfigBottomSheetWidget extends StatelessWidget {
           ),
           
           // LISTA DE PAUSAS
-          ...diaTrabalho.pausas.map((pausa) => ListTile(
+          ...controller.selectedDiaTrabalho.pausas.map((pausa) => ListTile(
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.free_breakfast_outlined),
             title: Text("${pausa.inicio} até ${pausa.fim}"),
             trailing: IconButton(
               icon: const Icon(Icons.delete_outline, color: Colors.red),
-              onPressed: () => controller.removerPausa(diaTrabalho.diaSemana, pausa),
+              onPressed: () =>{} // controller.removerPausa(diaTrabalho.diaSemana, pausa),
             ),
           )),
           

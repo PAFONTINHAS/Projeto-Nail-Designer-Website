@@ -25,7 +25,6 @@ Widget build(BuildContext context) {
   final controller = context.watch<AgendamentoController>();
   final String dataVisualizada = "${controller.dataVisualizada.day.toString().padLeft(2, '0')}/${controller.dataVisualizada.month.toString().padLeft(2, '0')}";
 
-  logger.i("Agendamentos atrasados: ${controller.agendamentosAtrasados}");
   return SafeArea(
     top: false,
     left: false,
