@@ -48,12 +48,12 @@ class _ConfigPageState extends State<ConfigPage> {
               const SizedBox(height: 20),
 
               // SEÇÃO 2: DIAS E HORÁRIOS
-              const BusinessHoursWidget(),
+              if(controller.agendaAtiva) const BusinessHoursWidget(),
 
               const SizedBox(height: 20),
 
               // SEÇÃO 3: BLOQUEIO DE DATAS
-              const BlockedDatesWidget(),
+              if(controller.agendaAtiva) const BlockedDatesWidget(),
 
               const SizedBox(height: 30),
 
