@@ -14,7 +14,7 @@ class Agenda extends Equatable {
   });
 
   Map<String, dynamic> toMap() => {
-    'diasTrabalho': diasTrabalho,
+    'diasTrabalho': diasTrabalho.map((dia) => dia.toMap()),
     'agendaAtiva': agendaAtiva,
     'datasBloqueadas': datasBloqueadas
   };

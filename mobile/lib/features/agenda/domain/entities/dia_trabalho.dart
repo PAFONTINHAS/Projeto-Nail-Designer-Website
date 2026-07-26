@@ -9,6 +9,15 @@ class DiaTrabalho extends Equatable {
 
   const DiaTrabalho({required this.diaSemana, required this.inicio, required this.fim, this.pausas = const []});
 
+  Map<String, dynamic> toMap(){
+    return {
+      'diaSemana': diaSemana,
+      'inicio': inicio,
+      'fim': fim,
+      'pausas': pausas.map((pausa) => pausa.toMap())
+    };
+  }
+
   DiaTrabalho copyWith ({
     int? diaSemana,
     String? inicio,

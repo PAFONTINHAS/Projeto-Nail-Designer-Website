@@ -57,8 +57,6 @@ class _ConfigPageState extends State<ConfigPage> {
 
               const SizedBox(height: 30),
 
-              const ChangeBasedButtonWidget(),
-
               const SizedBox(height: 40),
             ],
           ),

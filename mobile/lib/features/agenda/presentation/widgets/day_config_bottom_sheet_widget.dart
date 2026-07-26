@@ -114,17 +114,59 @@ class DayConfigBottomSheetWidget extends StatelessWidget {
                   itemCount: pausas.isEmpty ? 0 : pausas.length ,
                   shrinkWrap: true,
                   itemBuilder: (context, index){
-
-
                     final pausa = pausas[index];
 
-                    return ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.free_breakfast_outlined),
-                      title: Text("${pausa.inicio} até ${pausa.fim}"),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete_outline, color: Colors.red),
-                        onPressed: () => controller.removeInterval(controller.selectedDiaTrabalho.diaSemana, pausa.intervalId),
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0, top: 4.0),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.free_breakfast_outlined, color: Colors.grey),
+                          const SizedBox(width: 12),
+                          // BOTÃO DE INÍCIO DA PAUSA
+                          Expanded(
+                            child: InkWell(
+                              onTap: () async {
+                                String? pickedTime = await TimePickerHelper.selectTime(context, pausa.inicio);
+                                if (pickedTime != null) {
+                                  controller.updateInterval(controller.selectedDiaTrabalho.diaSemana, pausa.intervalId, novoInicio: pickedTime);
+                                }
+                              },
+                              child: InputDecorator(
+                                decoration: const InputDecoration(
+                                  labelText: "Início", 
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5), // Deixa menorzinho
+                                ),
+                                child: Text(pausa.inicio),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          // BOTÃO DE FIM DA PAUSA
+                          Expanded(
+                            child: InkWell(
+                              onTap: () async {
+                                String? pickedTime = await TimePickerHelper.selectTime(context, pausa.fim);
+                                if (pickedTime != null) {
+                                  controller.updateInterval(controller.selectedDiaTrabalho.diaSemana, pausa.intervalId, novoFim: pickedTime);
+                                }
+                              },
+                              child: InputDecorator(
+                                decoration: const InputDecoration(
+                                  labelText: "Fim", 
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                ),
+                                child: Text(pausa.fim),
+                              ),
+                            ),
+                          ),
+                          // BOTÃO DE EXCLUIR
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline, color: Colors.red),
+                            onPressed: () => controller.removeInterval(controller.selectedDiaTrabalho.diaSemana, pausa.intervalId),
+                          ),
+                        ],
                       ),
                     );
                   },

@@ -48,7 +48,7 @@ class AgendaController extends ChangeNotifier{
 
   Future<void> fillAgenda() async{
 
-    _diasTrabalho = agenda?.diasTrabalho ?? [];
+    _diasTrabalho = List<DiaTrabalho>.from(agenda?.diasTrabalho ?? []);
     _datasBloqueadas = agenda?.datasBloqueadas ?? _datasBloqueadas;
     _agendaAtiva = agenda?.agendaAtiva ?? _agendaAtiva;
 
@@ -114,7 +114,9 @@ class AgendaController extends ChangeNotifier{
 
       int index = _diasTrabalho.indexWhere((day) => day.diaSemana == workDay.diaSemana);
 
-      List<DiaTrabalho> workdays = _diasTrabalho;
+      if(index == -1) return;
+
+      List<DiaTrabalho> workdays = List<DiaTrabalho>.from(_diasTrabalho);
 
       workdays[index] = workDay;
 
@@ -128,7 +130,7 @@ class AgendaController extends ChangeNotifier{
       return;
     }
 
-    _diasTrabalho = List.from(_diasTrabalho)..add(workDay);
+    _diasTrabalho = List<DiaTrabalho>.from(_diasTrabalho)..add(workDay);
 
     logger.i("Dia adicionado com sucesso");
 
@@ -175,6 +177,34 @@ class AgendaController extends ChangeNotifier{
 
     _addNewWorkday(updatedWorkday);
 
+    notifyListeners();
+  }
+
+  void updateInterval(int weekday, int intervalId, {String? novoInicio, String? novoFim}) {
+    logger.i("Atualizando intervalo $intervalId do dia $weekday");
+
+    DiaTrabalho outdatedWorkday = getWorkDayByWeekDay(weekday);
+    
+    // Encontra o index do intervalo que queremos editar
+    int index = outdatedWorkday.pausas.indexWhere((p) => p.intervalId == intervalId);
+    if (index == -1) return;
+
+    final Intervalo pausaAntiga = outdatedWorkday.pausas[index];
+    
+    // Cria um novo intervalo mesclando os dados novos com os antigos
+    final Intervalo pausaAtualizada = Intervalo(
+      intervalId, 
+      novoInicio ?? pausaAntiga.inicio, 
+      novoFim ?? pausaAntiga.fim,
+    );
+
+    List<Intervalo> pausasAtualizadas = List.from(outdatedWorkday.pausas);
+    pausasAtualizadas[index] = pausaAtualizada;
+
+    DiaTrabalho updatedWorkday = outdatedWorkday.copyWith(pausas: pausasAtualizadas);
+    
+    _addNewWorkday(updatedWorkday);
+    setSelectedDiaTrabalho(updatedWorkday);
     notifyListeners();
   }
 
