@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/core/utils/helpers.dart';
 import 'package:mobile/features/agenda/domain/entities/agenda.dart';
+import 'package:mobile/features/agenda/domain/entities/dia_trabalho.dart';
 import 'package:mobile/features/agenda/presentation/pages/agenda_config_page.dart';
 import 'package:mobile/features/agendamento/domain/entities/agendamento_entity.dart';
 import 'package:mobile/features/agendamento/domain/entities/horario_slot.dart';
@@ -49,16 +50,11 @@ class AgendamentoFieldsController extends ChangeNotifier{
       }
     }
 
-    if(_dataSelecionada.weekday != 7 && !agenda!.diasTrabalho.contains(_dataSelecionada.weekday)){
-      return true;
-    }
+   int weekday = _dataSelecionada.weekday;
 
-    if(_dataSelecionada.weekday == 7 && !agenda!.diasTrabalho.contains(0)){
+   bool worksOnThisDay = agenda!.diasTrabalho.any((dia) => dia.diaSemana == weekday);
 
-      return true;
-    }
-
-    return false;
+    return !worksOnThisDay;
   }
 
   String _categoriaAtiva = "Alongamento";
@@ -76,27 +72,51 @@ class AgendamentoFieldsController extends ChangeNotifier{
   List<Servico> get selecionados => _selecionados;
 
   List<HorarioSlot> get gerarGradeHorarios{
-    // if(agenda == null) return [];
+    if(agenda == null) return [];
 
-    // List<HorarioSlot> slots = [];
+    final diaTrabalho = agenda!.diasTrabalho.where((dia) => dia.diaSemana == _dataSelecionada.weekday).firstOrNull;
 
-    // final int inicio = convertStringToTime(agenda!.horarioInicio);
-    // final int fim = convertStringToTime(agenda!.horarioFim);
-    // final int duracao = tempoTotal;
+    if(diaTrabalho == null) return [];
 
-    // for(int minutes = inicio; minutes < fim; minutes += 60){
-    //   String horaFormatada = formatMinutes(minutes);
+    List<HorarioSlot> slots = [];
 
-    //   bool estaOcupado = _verificarConflito(minutes, agendamentosDoDia);
+    final int inicio = convertStringToTime(diaTrabalho.inicio);
+    final int fim = convertStringToTime(diaTrabalho.fim);
+    final int duracao = tempoTotal;
 
-    //   bool cabeDuracao = _verificarSeCabe(minutes, duracao, agendamentosDoDia, fim);
+    for(int minutes = inicio; minutes < fim; minutes += 30){
+      String horaFormatada = formatMinutes(minutes);
 
-    //   slots.add(HorarioSlot(hora: horaFormatada, ocupado: estaOcupado, disponivelPelaDuracao: cabeDuracao));
-    // }
+      bool estaOcupado = _verificarConflito(minutes, agendamentosDoDia) || _verificarConflitoPausa(minutes, diaTrabalho.pausas);
 
-    // return slots;
+      bool cabeDuracao = _verificarSeCabe(minutes, duracao, agendamentosDoDia, fim) && _verificarSeCabeNaPausa(minutes, duracao, diaTrabalho.pausas);
 
-    return [];
+      slots.add(HorarioSlot(hora: horaFormatada, ocupado: estaOcupado, disponivelPelaDuracao: cabeDuracao));
+    }
+
+    return slots;
+
+  }
+
+  bool _verificarConflitoPausa(int minutos, List<dynamic> pausas) {
+    return pausas.any((pausa) {
+      int inicioPausa = convertStringToTime(pausa.inicio);
+      int fimPausa = convertStringToTime(pausa.fim);
+      
+      return minutos >= inicioPausa && minutos < fimPausa;
+    });
+  }
+
+  bool _verificarSeCabeNaPausa(int momentoInicio, int duracaoNecessaria, List<dynamic> pausas) {
+    int momentoFimProposto = momentoInicio + duracaoNecessaria;
+
+    return !pausas.any((pausa) {
+      int inicioPausa = convertStringToTime(pausa.inicio);
+      int fimPausa = convertStringToTime(pausa.fim);
+      
+      // Existe conflito se o atendimento começar antes da pausa terminar e terminar depois da pausa começar
+      return momentoInicio < fimPausa && momentoFimProposto > inicioPausa;
+    });
   }
 
   bool _verificarConflito(int minutos, List<AgendamentoEntity> agendamentosDoDia){
@@ -260,17 +280,22 @@ class AgendamentoFieldsController extends ChangeNotifier{
     notifyListeners();
   }
 
-  void _validarHorarioAposMudanca(BuildContext context){
+  void _validarHorarioAposMudanca(BuildContext context) {
+    if (_horarioSelecionado == null || agenda == null) return;
 
-    // if(_horarioSelecionado == null) return;
+    final diaTrabalho = agenda!.diasTrabalho.where((d) => d.diaSemana == _dataSelecionada.weekday).firstOrNull;
+    if (diaTrabalho == null) return;
 
-    // int momentoInicio = convertStringToTime(_horarioSelecionado!);
-    // int limiteFim = agenda != null ? convertStringToTime(agenda!.horarioFim) : 1440;  
+    int momentoInicio = convertStringToTime(_horarioSelecionado!);
+    int limiteFim = convertStringToTime(diaTrabalho.fim);  
 
-    // if(!_verificarSeCabe(momentoInicio, tempoTotal, _agendamentosDoDia, limiteFim)){
-    //   _horarioSelecionado = null;
-    //   mostrarFeedback(context, "O horário selecionado não comporta a nova duração.", Colors.orange);
-    // }
+    bool cabeNosAgendamentos = _verificarSeCabe(momentoInicio, tempoTotal, _agendamentosDoDia, limiteFim);
+    bool cabeNasPausas = _verificarSeCabeNaPausa(momentoInicio, tempoTotal, diaTrabalho.pausas);
+
+    if (!cabeNosAgendamentos || !cabeNasPausas) {
+      _horarioSelecionado = null;
+      mostrarFeedback(context, "O horário selecionado não comporta a nova duração.", Colors.orange);
+    }
   }
 
   void setName(String name){

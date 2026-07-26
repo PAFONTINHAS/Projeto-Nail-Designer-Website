@@ -1,4 +1,3 @@
-import 'package:logger/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/features/agenda/domain/entities/agenda.dart';
 import 'package:mobile/features/agenda/domain/entities/dia_trabalho.dart';
@@ -26,15 +25,6 @@ class AgendaController extends ChangeNotifier{
   List<DiaTrabalho> _diasTrabalho = [];
   List<DiaTrabalho> get diasTrabalho => _diasTrabalho;
   
-  String _horarioInicio = "";
-  String get horarioInicio => _horarioInicio;
-  
-  String _horarioFim = "";
-  String get horarioFim => _horarioFim;
-
-  List<int> _selecionados  = [];
-  List<int> get selecionados => _selecionados;
-
   List<String> _datasBloqueadas = [];
   List<String> get datasBloqueadas => _datasBloqueadas;
 
@@ -246,38 +236,6 @@ class AgendaController extends ChangeNotifier{
     return DiaTrabalho(diaSemana: weekday, inicio: "09:00", fim: "18:00");
   }
 
-  void orderDiasSelecionados(){
-    
-    if(_selecionados.isEmpty) return;
-  
-    _selecionados.sort();
-  }
-  
-  void setHorarioInicio (String novoHorario){
-    _horarioInicio = novoHorario;
-    Logger().i("Horário selecionado: $_horarioInicio");
-    notifyListeners();
-  }
-
-  void setHorarioFim (String novoHorario){
-    _horarioFim = novoHorario;
-    Logger().i("Horário selecionado: $_horarioFim");
-    notifyListeners();
-  }
-
-  void addDiaSelecionado(int novoDia){
-    _selecionados = List.from(_selecionados)..add(novoDia);
-
-    orderDiasSelecionados();
-    notifyListeners();
-  }
-
-  void removeDiaSelecionado(int dia){
-    _selecionados = List.from(_selecionados)..removeWhere((diaAntigo) => dia == diaAntigo);
-    
-    orderDiasSelecionados();
-    notifyListeners();
-  }
 
   void toggleAgendaAtiva(bool value){
     _agendaAtiva = value;
