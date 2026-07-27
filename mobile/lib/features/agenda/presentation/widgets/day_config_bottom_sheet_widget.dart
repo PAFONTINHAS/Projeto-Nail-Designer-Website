@@ -6,9 +6,10 @@ import 'package:provider/provider.dart';
 
 class DayConfigBottomSheetWidget extends StatelessWidget {
   // final DiaTrabalho diaTrabalho;
-  final AgendaController controller;
+  final AgendaController controller; 
+  final String selectedDay;
 
-  const DayConfigBottomSheetWidget({super.key, required this.controller});
+  const DayConfigBottomSheetWidget({super.key, required this.controller, required this.selectedDay});
 
   @override
   Widget build(BuildContext context) {
@@ -25,10 +26,10 @@ class DayConfigBottomSheetWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [ 
               Text(
-                "Configurar Dia",
+                "Configurar Dia - $selectedDay",
                 style: Theme.of(
                   context,
-                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               
               TextButton(
@@ -42,7 +43,7 @@ class DayConfigBottomSheetWidget extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          
+
           // HORÁRIO PRINCIPAL
           Row(
             children: [

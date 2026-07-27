@@ -50,7 +50,7 @@ class BusinessHoursWidget extends StatelessWidget {
               },
             ),
             onTap: isActive 
-              ? () => _abrirConfiguracaoDoDia(context, workDay, controller)
+              ? () => _abrirConfiguracaoDoDia(context, workDay, controller, days[index])
               : null,
           );
 
@@ -59,7 +59,7 @@ class BusinessHoursWidget extends StatelessWidget {
     );
   }
 
-  void _abrirConfiguracaoDoDia(BuildContext context, DiaTrabalho diaTrabalho, AgendaController controller) {
+  void _abrirConfiguracaoDoDia(BuildContext context, DiaTrabalho diaTrabalho, AgendaController controller, String day) {
 
     logger.i("Dia de trabaho: $diaTrabalho");
 
@@ -69,7 +69,7 @@ class BusinessHoursWidget extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (context) => DayConfigBottomSheetWidget(controller: controller),
+      builder: (context) => DayConfigBottomSheetWidget(controller: controller, selectedDay: day),
     );
   }
 }

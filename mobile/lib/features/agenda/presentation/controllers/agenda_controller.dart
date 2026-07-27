@@ -49,10 +49,13 @@ class AgendaController extends ChangeNotifier{
 
     if (agenda == null) return false;
 
+    final List<DiaTrabalho> diasTrabalho = List<DiaTrabalho>.from(_diasTrabalho);
+    final List<DiaTrabalho> agendaWorkdays = List<DiaTrabalho>.from(agenda!.diasTrabalho);
+
 
     if(_agendaAtiva != agenda!.agendaAtiva) return true;
 
-    if(!_islistsEqual(_diasTrabalho, agenda!.diasTrabalho)) return true;
+    if(!_islistsEqual(diasTrabalho, agendaWorkdays)) return true;
 
     
     if(!_islistsEqual(_datasBloqueadas, agenda!.datasBloqueadas)) return true;
@@ -78,7 +81,7 @@ class AgendaController extends ChangeNotifier{
 
       logger.i("Toggling workday. Weekday: $weekday, active: $value");
 
-      _diasTrabalho.removeWhere((dia) => dia.diaSemana == weekday);
+      _diasTrabalho = List<DiaTrabalho>.from(_diasTrabalho)..removeWhere((dia) => dia.diaSemana == weekday);
 
       notifyListeners();
 

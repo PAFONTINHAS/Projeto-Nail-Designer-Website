@@ -22,6 +22,8 @@ class _ConfigPageState extends State<ConfigPage> {
   Widget build(BuildContext context) {
 
     final controller = context.watch<AgendaController>();
+
+    logger.i("\nDias de trabalho: ${controller.diasTrabalho}. \nAgenda atual: ${controller.agenda}");
     return Scaffold(
       backgroundColor: const Color(
         0xFFF8F9FA,
