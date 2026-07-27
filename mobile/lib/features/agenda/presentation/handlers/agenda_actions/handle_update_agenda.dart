@@ -8,7 +8,7 @@ class HandleUpdateAgenda {
 
   static Future<void> call(BuildContext context) async{
 
-    final controller = context.read<ConfiguracoesController>();
+    final controller = context.read<AgendaController>();
 
     final Agenda updatedAgenda = await controller.buildUpdatedAgenda();
 

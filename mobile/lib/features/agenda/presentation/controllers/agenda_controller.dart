@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:mobile/features/agenda/domain/entities/agenda.dart';
+import 'package:mobile/features/agenda/domain/entities/dia_trabalho.dart';
+import 'package:mobile/features/agenda/domain/entities/intervalo.dart';
 import 'package:mobile/features/agenda/domain/usecases/get_agenda_usecase.dart';
 import 'package:mobile/features/agenda/domain/usecases/update_agenda_usecase.dart';
 import 'package:mobile/features/agenda/presentation/pages/agenda_config_page.dart';
 
-class ConfiguracoesController extends ChangeNotifier{
+class AgendaController extends ChangeNotifier{
 
   final GetAgendaUsecase _getAgendaUsecase;
   final UpdateAgendaUsecase _updateAgendaUsecase;
 
-  ConfiguracoesController(this._getAgendaUsecase,  this._updateAgendaUsecase);
+  AgendaController(this._getAgendaUsecase,  this._updateAgendaUsecase);
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -20,18 +21,15 @@ class ConfiguracoesController extends ChangeNotifier{
 
   String? _errorMessage;
   String? get errorMessage => _errorMessage;
-  
-  String _horarioInicio = "";
-  String get horarioInicio => _horarioInicio;
-  
-  String _horarioFim = "";
-  String get horarioFim => _horarioFim;
 
-  List<int> _selecionados  = [];
-  List<int> get selecionados => _selecionados;
-
+  List<DiaTrabalho> _diasTrabalho = [];
+  List<DiaTrabalho> get diasTrabalho => _diasTrabalho;
+  
   List<String> _datasBloqueadas = [];
   List<String> get datasBloqueadas => _datasBloqueadas;
+
+  late DiaTrabalho _selectedDiaTrabalho;
+  DiaTrabalho get selectedDiaTrabalho => _selectedDiaTrabalho;
 
   bool _agendaAtiva = true;
   bool get agendaAtiva => _agendaAtiva;
@@ -39,9 +37,8 @@ class ConfiguracoesController extends ChangeNotifier{
   bool get haveAgendaChanged => verifyAgendaChanges();
 
   Future<void> fillAgenda() async{
-    _selecionados = agenda?.diasTrabalho ?? [];
-    _horarioInicio = agenda?.horarioInicio ?? _horarioInicio;
-    _horarioFim = agenda?.horarioFim ?? _horarioFim;
+
+    _diasTrabalho = List<DiaTrabalho>.from(agenda?.diasTrabalho ?? []);
     _datasBloqueadas = agenda?.datasBloqueadas ?? _datasBloqueadas;
     _agendaAtiva = agenda?.agendaAtiva ?? _agendaAtiva;
 
@@ -52,18 +49,21 @@ class ConfiguracoesController extends ChangeNotifier{
 
     if (agenda == null) return false;
 
-    if(_horarioFim != agenda!.horarioFim) return true;
+    final List<DiaTrabalho> diasTrabalho = List<DiaTrabalho>.from(_diasTrabalho);
+    final List<DiaTrabalho> agendaWorkdays = List<DiaTrabalho>.from(agenda!.diasTrabalho);
+
+
     if(_agendaAtiva != agenda!.agendaAtiva) return true;
-    if(_horarioInicio != agenda!.horarioInicio) return true;
+
+    if(!_islistsEqual(diasTrabalho, agendaWorkdays)) return true;
 
     
-    if(!_listEquals(_selecionados, agenda!.diasTrabalho)) return true;
-    if(!_listEquals(_datasBloqueadas, agenda!.datasBloqueadas)) return true;
+    if(!_islistsEqual(_datasBloqueadas, agenda!.datasBloqueadas)) return true;
 
     return false;
   }
 
-  bool _listEquals(List a, List b){
+  bool _islistsEqual(List a, List b){
     if(a.length != b.length) return false;
 
     for(int i = 0; i<a.length; i++){
@@ -73,38 +73,172 @@ class ConfiguracoesController extends ChangeNotifier{
     return true;
   }
 
-  void orderDiasSelecionados(){
+  void toggleWorkDay(int weekday, bool value){
+
+    logger.i("Toggling workday. Weekday: $weekday, active: $value");
+
+    if(!value){
+
+      logger.i("Toggling workday. Weekday: $weekday, active: $value");
+
+      _diasTrabalho = List<DiaTrabalho>.from(_diasTrabalho)..removeWhere((dia) => dia.diaSemana == weekday);
+
+      notifyListeners();
+
+      return;
+    }
+
+    DiaTrabalho diaTrabalho = generateGenericWorkDay(weekday);
+
+    _addNewWorkday(diaTrabalho);
+
+    notifyListeners();
+  }
+
+  void _addNewWorkday(DiaTrabalho workDay){
+
+    logger.i("Dia a ser adicionado: $workDay");
+
+    bool alreadyIn = _diasTrabalho.any((day) => day.diaSemana == workDay.diaSemana);
+
+    logger.i("Lista já possui o dia inserido: $alreadyIn");
+
+    if(alreadyIn){
+
+      int index = _diasTrabalho.indexWhere((day) => day.diaSemana == workDay.diaSemana);
+
+      if(index == -1) return;
+
+      List<DiaTrabalho> workdays = List<DiaTrabalho>.from(_diasTrabalho);
+
+      workdays[index] = workDay;
+
+      _diasTrabalho = workdays;
+
+      logger.i("Dia alterado com sucesso");
+
+      logger.i("Agenda atual: $_diasTrabalho");
+
+
+      return;
+    }
+
+    _diasTrabalho = List<DiaTrabalho>.from(_diasTrabalho)..add(workDay);
+
+    logger.i("Dia adicionado com sucesso");
+
+    logger.i("Agenda atual: $_diasTrabalho");
+  }
+
+  void changeOpeningHour(int weekday, String openingHour){
     
-    if(_selecionados.isEmpty) return;
-  
-    _selecionados.sort();
+    logger.i("Alterando o horário de inicio para o dia: $weekday. Horário de inicio: $openingHour");
+
+    final DiaTrabalho outdatedWorkday = _diasTrabalho.firstWhere((day) => day.diaSemana == weekday);
+
+    final DiaTrabalho updatedWorkday = outdatedWorkday.copyWith(inicio: openingHour);
+
+    _addNewWorkday(updatedWorkday);
+
+    setSelectedDiaTrabalho(updatedWorkday);
+
+    notifyListeners();  
+
   }
-  
-  void setHorarioInicio (String novoHorario){
-    _horarioInicio = novoHorario;
-    Logger().i("Horário selecionado: $_horarioInicio");
+
+  void setSelectedDiaTrabalho (DiaTrabalho diaTrabalho){
+    _selectedDiaTrabalho = diaTrabalho;
     notifyListeners();
   }
 
-  void setHorarioFim (String novoHorario){
-    _horarioFim = novoHorario;
-    Logger().i("Horário selecionado: $_horarioFim");
+  void addInterval(int weekday){
+
+    List<Intervalo> intervalos = List.from(selectedDiaTrabalho.pausas)
+      ..sort((a, b) => a.intervalId.compareTo(b.intervalId));
+
+
+    int intervalId = intervalos.isEmpty ? 0 : intervalos.last.intervalId + 1;
+
+    Intervalo intervalo = Intervalo(intervalId, "10:00", "11:00");
+
+    intervalos.add(intervalo);
+
+    DiaTrabalho outdatedWorkday = getWorkDayByWeekDay(weekday);
+
+    DiaTrabalho updatedWorkday = outdatedWorkday.copyWith(pausas: intervalos);
+    setSelectedDiaTrabalho(updatedWorkday);
+
+    _addNewWorkday(updatedWorkday);
+
     notifyListeners();
   }
 
-  void addDiaSelecionado(int novoDia){
-    _selecionados = List.from(_selecionados)..add(novoDia);
+  void updateInterval(int weekday, int intervalId, {String? novoInicio, String? novoFim}) {
+    logger.i("Atualizando intervalo $intervalId do dia $weekday");
 
-    orderDiasSelecionados();
-    notifyListeners();
-  }
-
-  void removeDiaSelecionado(int dia){
-    _selecionados = List.from(_selecionados)..removeWhere((diaAntigo) => dia == diaAntigo);
+    DiaTrabalho outdatedWorkday = getWorkDayByWeekDay(weekday);
     
-    orderDiasSelecionados();
+    // Encontra o index do intervalo que queremos editar
+    int index = outdatedWorkday.pausas.indexWhere((p) => p.intervalId == intervalId);
+    if (index == -1) return;
+
+    final Intervalo pausaAntiga = outdatedWorkday.pausas[index];
+    
+    // Cria um novo intervalo mesclando os dados novos com os antigos
+    final Intervalo pausaAtualizada = Intervalo(
+      intervalId, 
+      novoInicio ?? pausaAntiga.inicio, 
+      novoFim ?? pausaAntiga.fim,
+    );
+
+    List<Intervalo> pausasAtualizadas = List.from(outdatedWorkday.pausas);
+    pausasAtualizadas[index] = pausaAtualizada;
+
+    DiaTrabalho updatedWorkday = outdatedWorkday.copyWith(pausas: pausasAtualizadas);
+    
+    _addNewWorkday(updatedWorkday);
+    setSelectedDiaTrabalho(updatedWorkday);
     notifyListeners();
   }
+
+  void removeInterval(int weekday, int intervalId){
+
+    List<Intervalo> intervalos = List.from(selectedDiaTrabalho.pausas)..removeWhere((pausa) => pausa.intervalId == intervalId);
+
+    DiaTrabalho outdatedWorkday = getWorkDayByWeekDay(weekday);
+
+    DiaTrabalho updatedWorkday = outdatedWorkday.copyWith(pausas: intervalos);
+    setSelectedDiaTrabalho(updatedWorkday);
+
+    _addNewWorkday(updatedWorkday);
+
+    notifyListeners();
+  }
+
+  DiaTrabalho getWorkDayByWeekDay(int weekday){
+
+    return _diasTrabalho.firstWhere((day) => day.diaSemana == weekday);
+
+  }
+
+  void changeClosingHour(int weekday, String closingHour){
+
+    final DiaTrabalho outdatedWorkday = _diasTrabalho.firstWhere((day) => day.diaSemana == weekday);
+
+    final DiaTrabalho updatedWorkday = outdatedWorkday.copyWith(fim: closingHour);
+
+    _addNewWorkday(updatedWorkday);
+
+    setSelectedDiaTrabalho(updatedWorkday);
+
+    notifyListeners();  
+  }
+
+  DiaTrabalho generateGenericWorkDay(int weekday){
+
+    return DiaTrabalho(diaSemana: weekday, inicio: "09:00", fim: "18:00");
+  }
+
 
   void toggleAgendaAtiva(bool value){
     _agendaAtiva = value;
@@ -153,11 +287,9 @@ class ConfiguracoesController extends ChangeNotifier{
   Future<Agenda> buildUpdatedAgenda() async{
     
     return Agenda(
-      diasTrabalho: _selecionados,
-      horarioInicio: _horarioInicio,
-      horarioFim: _horarioFim,
-      datasBloqueadas: datasBloqueadas,
       agendaAtiva: agendaAtiva,
+      diasTrabalho: _diasTrabalho,
+      datasBloqueadas: datasBloqueadas,
     );
   }  
 

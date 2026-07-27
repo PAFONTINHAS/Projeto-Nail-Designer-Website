@@ -1,10 +1,10 @@
+import { from, Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { FirebaseServerApp } from 'firebase/app';
-import { FirebaseService } from '../firebase-service/firebase-service';
-import { from, Observable } from 'rxjs';
-import { collection, Firestore, query, where, onSnapshot, addDoc, Timestamp, doc, getDoc} from 'firebase/firestore';
 import { Agendamento } from '../../models/agendamento_model';
 import { AgendaConfig } from '../../models/agenda_config_model';
+import { FirebaseService } from '../firebase-service/firebase-service';
+import { collection, Firestore, query, where, onSnapshot, addDoc, Timestamp, doc, getDoc} from 'firebase/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -24,10 +24,8 @@ export class AgendamentoService {
     }
 
     const configModel: AgendaConfig = {
-      diasTrabalho: data['diasTrabalho'],
-      horarioInicio: data['horarioInicio'],
-      horarioFim: data['horarioFim'],
       agendaAtiva: data['agendaAtiva'],
+      diasTrabalho: data['diasTrabalho'],
       datasBloqueadas: data['datasBloqueadas']
     };
 
@@ -49,10 +47,8 @@ export class AgendamentoService {
 
           if (data) {
             const configModel: AgendaConfig = {
-              diasTrabalho: data['diasTrabalho'],
-              horarioInicio: data['horarioInicio'],
-              horarioFim: data['horarioFim'],
               agendaAtiva: data['agendaAtiva'],
+              diasTrabalho: data['diasTrabalho'],
               datasBloqueadas: data['datasBloqueadas']
             };
 

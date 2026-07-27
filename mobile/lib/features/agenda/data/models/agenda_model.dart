@@ -1,13 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mobile/core/utils/helpers.dart';
+import 'package:mobile/features/agenda/data/models/dia_trabalho_model.dart';
 import 'package:mobile/features/agenda/domain/entities/agenda.dart';
+import 'package:mobile/features/agenda/domain/entities/dia_trabalho.dart';
+import 'package:mobile/features/agenda/presentation/pages/agenda_config_page.dart';
 
 class AgendaModel extends Agenda{
 
-  AgendaModel({
+  const AgendaModel({
     required super.diasTrabalho,
-    required super.horarioFim,
-    required super.horarioInicio,
     required super.datasBloqueadas,
     super.agendaAtiva
   });
@@ -16,16 +17,27 @@ class AgendaModel extends Agenda{
 
     final data = doc.data() as Map<String, dynamic>;
 
+    logger.i("Data: $data");
+    logger.i("Dias de trabalho: ${data['diasTrabalho']}");
+
+    final List<dynamic> diasTrabalhoList = data['diasTrabalho'] as List<dynamic>;
+
+    final List<Map<String, dynamic>> typedList = List<Map<String, dynamic>>.from(diasTrabalhoList);
+
+    final List<DiaTrabalho> diasTrabalho = typedList.map((dia) => DiaTrabalhoModel.fromMap(dia)).toList();
+
+
     return AgendaModel(
-      diasTrabalho: List<int>.from(data['diasTrabalho']),
-      horarioFim: data['horarioFim'],
-      horarioInicio: data['horarioInicio'],
+      agendaAtiva: data['agendaAtiva'],
+      diasTrabalho: diasTrabalho,
       datasBloqueadas: List<String>.from(data['datasBloqueadas'] ?? []),
-      agendaAtiva: data['agendaAtiva']
     );
   }
 
 }
+
+
+
 
 extension ListDateExtension on List<Timestamp>{
   

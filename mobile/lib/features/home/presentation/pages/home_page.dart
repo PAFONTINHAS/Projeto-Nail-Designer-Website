@@ -25,7 +25,6 @@ Widget build(BuildContext context) {
   final controller = context.watch<AgendamentoController>();
   final String dataVisualizada = "${controller.dataVisualizada.day.toString().padLeft(2, '0')}/${controller.dataVisualizada.month.toString().padLeft(2, '0')}";
 
-  logger.i("Agendamentos atrasados: ${controller.agendamentosAtrasados}");
   return SafeArea(
     top: false,
     left: false,
@@ -36,7 +35,7 @@ Widget build(BuildContext context) {
     floatingActionButton: FloatingActionButton.extended(
       onPressed: () {
         final agendamentoController=  context.read<AgendamentoController>();
-        final agendaController = context.read<ConfiguracoesController>();
+        final agendaController = context.read<AgendaController>();
         final agendamentoFieldsController = context.read<AgendamentoFieldsController>();
 
         agendamentoFieldsController.setAgendamentosDoDia(agendamentoController.agendamentos);

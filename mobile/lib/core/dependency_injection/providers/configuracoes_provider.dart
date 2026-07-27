@@ -17,6 +17,6 @@ class ConfiguracoesProvider {
   static final UpdateAgendaUsecase updateAgendaUsecase = UpdateAgendaUsecase(configuracoesRepository);
 
   static List<SingleChildWidget> providers = [
-    ChangeNotifierProvider(create: (_) => ConfiguracoesController(getAgendaUsecase, updateAgendaUsecase))
+    ChangeNotifierProvider(create: (_) => AgendaController(getAgendaUsecase, updateAgendaUsecase))
   ];
 }

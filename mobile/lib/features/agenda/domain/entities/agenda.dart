@@ -1,40 +1,43 @@
-class Agenda {
-  final List<int> diasTrabalho;
-  final String horarioInicio;
-  final String horarioFim;
+import 'package:equatable/equatable.dart';
+import 'package:mobile/features/agenda/domain/entities/dia_trabalho.dart';
+
+class Agenda extends Equatable {
+  final List<DiaTrabalho> diasTrabalho;
   final List<String> datasBloqueadas;
   final bool agendaAtiva;
   
 
-  Agenda({
+  const Agenda({
     required this.diasTrabalho,
-    required this.horarioInicio,
-    required this.horarioFim,
     required this.datasBloqueadas,
     this.agendaAtiva = true
   });
 
   Map<String, dynamic> toMap() => {
-    'diasTrabalho': diasTrabalho,
-    'horarioInicio': horarioInicio,
-    'horarioFim': horarioFim,
+    'diasTrabalho': diasTrabalho.map((dia) => dia.toMap()),
     'agendaAtiva': agendaAtiva,
     'datasBloqueadas': datasBloqueadas
   };
 
   Agenda copyWith({
-    List<int>? diasTrabalho,
+    List<DiaTrabalho>? diasTrabalho,
     String? horarioInicio,
     String? horarioFim,
     List<String>? datasBloqueadas,
     bool? agendaAtiva,
   }){
     return Agenda(
-      horarioFim: horarioFim ?? this.horarioFim,
       diasTrabalho: diasTrabalho ?? this.diasTrabalho,
-      horarioInicio: horarioInicio ?? this.horarioInicio,
       datasBloqueadas: datasBloqueadas ?? this.datasBloqueadas,
       agendaAtiva: agendaAtiva ?? this.agendaAtiva
     );
   }
+
+
+  @override
+  List<Object?> get props => [
+    agendaAtiva,
+    diasTrabalho,
+    datasBloqueadas,
+  ];
 }
