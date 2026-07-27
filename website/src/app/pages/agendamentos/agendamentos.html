@@ -171,7 +171,7 @@
                                 (click)="selecionarHorario(item.hora)">
                                 {{item.hora}}
                                 @if(item.ocupado){
-                                <span class="status-badge">Ocupado</span>
+                                <span class="status-badge">{{item.label}}</span>
                                 }
                             </button>
 
